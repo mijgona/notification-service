@@ -1,0 +1,6 @@
+/bin/
+.env
+*.out
+coverage.html
+.idea/
+.vscode/
