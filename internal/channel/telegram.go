@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -51,9 +52,18 @@ func (t *Telegram) Send(ctx context.Context, msg Message) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		// TODO(mijgona): read the response body and surface Telegram's
-		// error description; treat 400-level errors as non-retryable.
-		return fmt.Errorf("telegram: unexpected status %d", resp.StatusCode)
+		// Surface Telegram's error description. 4xx responses are client
+		// errors (bad chat_id, bot blocked, …) that retrying cannot fix, so
+		// classify them as permanent; 5xx and transport errors stay transient.
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		desc := string(bytes.TrimSpace(body))
+		if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+			return Permanent(
+				fmt.Sprintf("telegram: status %d: %s", resp.StatusCode, desc),
+				nil,
+			)
+		}
+		return fmt.Errorf("telegram: unexpected status %d: %s", resp.StatusCode, desc)
 	}
 	return nil
 }
