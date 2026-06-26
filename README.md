@@ -92,7 +92,7 @@ migrations/   goose SQL migrations
 ## Roadmap
 
 - [x] Non-retryable error wiring (`temporal.NewNonRetryableApplicationError` for permanent failures)
-- [ ] Integration tests with testcontainers
+- [x] Integration tests with testcontainers
 - [ ] NATS intake as an alternative to HTTP
 - [ ] Message templates
 - [ ] Per-recipient rate limiting
