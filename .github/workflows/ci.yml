@@ -28,3 +28,15 @@ jobs:
         with:
           version: v1.64.8
           install-mode: goinstall
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      # ubuntu-latest runners ship a running Docker engine, which the
+      # testcontainers-based suite needs. It starts real Postgres + Mailpit
+      # containers and a real Temporal dev server.
+      - run: make test-integration
